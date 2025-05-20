@@ -1,0 +1,95 @@
+/.idea/.idea.PocketKaiju/.idea/.gitignore
+/.idea/.idea.PocketKaiju/.idea/encodings.xml
+/.idea/.idea.PocketKaiju/.idea/indexLayout.xml
+/.idea/.idea.PocketKaiju/.idea/vcs.xml
+
+##############
+# .NET / C#  #
+##############
+
+# Build output
+bin/
+obj/
+out/
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+
+# Razor build files
+*.g.cs
+*.g.i.cs
+*.g.cshtml.cs
+
+# NuGet
+*.nupkg
+*.snupkg
+*.nuspec
+*.psmdcp
+*.nuproj
+project.lock.json
+project.fragment.lock.json
+artifacts/
+.nuget/
+packages/
+*.nuget.props
+*.nuget.targets
+
+# MSBuild logs
+msbuild.log
+*.log
+
+# Rider IDE
+.idea/
+*.sln.iml
+
+# VS Code
+.vscode/
+
+# Visual Studio
+.vs/
+
+# Windows / macOS specific
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+*.orig
+
+# Backup files
+*.bak
+*.old
+*.tmp
+*.swp
+
+# Test results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+*.vspx
+*.vsp
+
+# Others
+_ReSharper*/
+*.dotCover
+*.dotSettings.user
+*.resharper.user
+*.dbmdl
+*.sql
+
+# Web/Blazor specific
+wwwroot/dist/
+wwwroot/node_modules/
+node_modules/
+bower_components/
+.env
+.env.*
+
+# Docker
+docker-compose.override.yml
+*.containerbuild
+
+

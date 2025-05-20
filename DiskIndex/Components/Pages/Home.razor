@@ -1,0 +1,167 @@
+﻿@page "/"
+@inject FileSyncService FileSyncService
+@using MudBlazor
+@using MudBlazor.Extensions;
+@using DiskIndex.Models
+@using System.IO
+@using System.Diagnostics
+@using System.Linq.Dynamic.Core
+@using System.Linq.Expressions
+
+@inject ICatalogService catalogService
+@inject MudBlazor.ISnackbar snackBar
+
+<PageTitle>Home</PageTitle>
+
+<MudButton Disabled="@syncLoading" OnClick="RefreshFiles" Variant="Variant.Filled" Color="Color.Primary" >
+    @if (syncLoading)
+    {
+        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+        <MudText Class="ms-2">Loading</MudText>
+    }
+    else
+    {
+        <MudText>Update Database</MudText>
+    }
+</MudButton>
+<MudText Typo="Typo.h6" Class="mt-4">
+    @GetFirstLineAsync()
+</MudText>
+
+<MudDataGrid @ref="grid"
+T="FileRecord"
+ServerData="LoadServerData"
+ServerSide="true"
+PageSize="10"
+RowsPerPage="10"
+Hover="true"
+Dense="true"
+Elevation="2"
+Loading="@loading"
+Bordered="true"
+SortMode="SortMode.Multiple"
+Filterable="true">
+    <ToolBarContent>
+        <MudTextField T="string" Value="@searchString" ValueChanged="@OnSearchChanged" Placeholder="Search..." Immediate="true" />
+    </ToolBarContent>
+
+    <Columns>
+        <PropertyColumn Property="x => x.Name" Title="Name" />
+        <PropertyColumn Property="x => x.Type" Title="Type" />
+        <PropertyColumn Property="x => x.FormattedSize" Title="Size" />
+        <PropertyColumn Property="x => x.TrimmedPath" Title="Path" />
+        <PropertyColumn Property="x => x.Category" Title="Category" />
+        <PropertyColumn Property="x => x.LastModified" Title="Last Edit" />
+        @* <TemplateColumn CellClass="d-flex justify-end">
+            <CellTemplate>
+                <MudStack Row>
+                    <MudIconButton Icon="@Icons.Material.Filled.Download" Color="Color.Primary" />
+                </MudStack>
+            </CellTemplate>
+        </TemplateColumn> *@
+    </Columns>
+
+    <PagerContent>
+        <MudDataGridPager T="FileRecord" />
+    </PagerContent>
+
+</MudDataGrid>
+
+@code {
+    private MudDataGrid<FileRecord> grid;
+    private string searchString = "";
+    private List<FileRecord> fileRecords = new();
+    private bool loading = false;
+    private bool syncLoading = false;
+    private string firstLine = string.Empty;
+
+
+    private async Task<GridData<FileRecord>> LoadServerData(GridState<FileRecord> state)
+    {
+        loading = true;
+        var skip = state.Page * state.PageSize;
+        var take = state.PageSize;
+
+        var sortDefinition = state.SortDefinitions.FirstOrDefault();
+        string? sortField = sortDefinition?.SortBy as string;
+        bool descending = sortDefinition?.Descending ?? false;
+
+        var (records, totalCount) = await catalogService.GetPagedRecordsAsync(skip, take, searchString, sortField, descending);
+        loading = false;
+
+        return new GridData<FileRecord>
+            {
+                TotalItems = totalCount,
+                Items = records
+            };
+    }
+
+    private async Task OnSearchChanged(string value)
+    {
+        searchString = value;
+        await grid.ReloadServerData();
+    }
+
+    private async Task RefreshFiles()
+    {
+        syncLoading = true;
+
+		string rootFolder = RootFolderCheck.GetRootFolderPath(); // Configurable root folder path through the rootFolderPath.JSON file in Configs\
+        await FileSyncService.RefreshDatabaseAsync(rootFolder);
+
+		//Small logs system using a few .txt files, located in DiskIndex\Logs\
+		//Eventually I'll move it to a separated class to use it in other pages and components ** TODO
+		//Check @firstLine and @GetFirstLineAsync() method to view the last scan date and the total number of resources in the database
+        try
+        {
+            var logPath = @"Logs\LatestScanLog.txt";
+            Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
+
+            var GeneralScanLogPath = @"Logs\GeneralScanLogs.txt";
+            Directory.CreateDirectory(Path.GetDirectoryName(GeneralScanLogPath)!);
+
+            //General log file that keeps all full scans ** DiskIndex\Logs\GeneralScanLogs.txt
+            var GeneralLines = File.Exists(GeneralScanLogPath) ? (await File.ReadAllLinesAsync(GeneralScanLogPath)).ToList() : new List<string>();
+            var count = await catalogService.CountAllFilesAsync();
+
+            GeneralLines.Insert(0, $"Full disk scan/db update requested on {DateTime.Now}\nTotal Count Records: {count}\n_______________________________");
+            await File.WriteAllLinesAsync(GeneralScanLogPath, GeneralLines);
+
+            //Single log to view it with GetFirstLineAsync() ** DiskIndex\Logs\LatestScanLog.txt
+            var lines = File.Exists(logPath) ? (await File.ReadAllLinesAsync(logPath)).ToList() : new List<string>();
+			// Removes the first line if it exists
+            if (lines.Count > 0)
+                lines.RemoveAt(0);
+
+			// Adds the new first line
+            lines.Insert(0, $"Last Full Scan: {DateTime.Now} | Tot. files: {count}");
+
+			// Writes the updated lines back to the file
+            await File.WriteAllLinesAsync(logPath, lines);
+        }
+        catch (Exception e)
+        {
+			// If there is an exception while writing the log, it will be printed in the console and saved in a separate file
+            Console.WriteLine("Exception: " + e.Message);
+            Directory.CreateDirectory(@"Logs\");
+            await File.AppendAllTextAsync(@"Logs\ErrorLogs.txt",
+                $"!Exception: {e.Message} - {DateTime.Now}\n");
+        }
+        GetFirstLineAsync();
+
+        syncLoading = false;
+		await grid.ReloadServerData(); // Optional to refresh the grid after sync
+    }
+
+    // To write it on the page using the single log file
+    private string GetFirstLineAsync()
+    {
+        using var reader = new StreamReader(@"Logs\LatestScanLog.txt");
+        firstLine = reader.ReadLine();
+        return firstLine;
+    }
+
+}
+
+
+
