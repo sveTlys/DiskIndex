@@ -54,6 +54,7 @@ If your collection is meant to be accessed remotely by others — but it's a mes
 DiskIndex uses a Blazor Server app with the following architecture:
 
 - `FileSyncService` scans the disk and updates a local SQLite database (`FileDatabase.db`).
+- Packages used (for now): Entity Framework and MudBlazor
 - The files are stored in the `FileRecord` table with metadata like path, size, category, and NSFW flag (optional to filter files).
 - A `CatalogService` handles database queries, exposed to the UI via dependency injection.
 - UI is built with MudBlazor, and includes a searchable, sortable `MudDataGrid`.
