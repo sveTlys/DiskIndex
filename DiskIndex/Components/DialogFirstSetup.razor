@@ -1,0 +1,46 @@
+﻿<MudDialog>
+    <TitleContent>
+		<h2>Directory Setup</h2>
+    </TitleContent>
+    <DialogContent>
+        First time using DiskIndex?
+        <br />Its no biggie! Enter the folder path you'd like to use:
+
+        @if(Directory.Exists(TextValue) == true)
+        {
+            <MudTextField @bind-Value="TextValue" Label="Example: D:\Animals\CuteCatsFolder" HelperText="Looks fine! Click the Apply button to proceed."  Variant="Variant.Filled" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.CheckCircle" AdornmentColor="Color.Success" Immediate="true"></MudTextField>
+        }
+        else
+        {
+            <MudTextField @bind-Value="TextValue" Label="Example: D:\Animals\CuteCatsFolder" HelperText="Seems like the directory doesn't exists or its empty, double check it!" Variant="Variant.Filled" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Clear" AdornmentColor="Color.Error" Immediate="true"></MudTextField>
+        }
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+
+        @if (Directory.Exists(TextValue) == true)
+        {
+            <MudButton Color="Color.Primary" OnClick="Submit">Apply</MudButton>
+        }
+        else
+        {
+            <MudButton Disabled="true">Apply</MudButton>
+        }
+
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+
+    public string TextValue { get; set; }
+
+    private void Submit()
+    {
+        RootFolderCheck.SetRootFolderPath(TextValue);
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+       
+    private void Cancel() => MudDialog.Cancel();
+}
