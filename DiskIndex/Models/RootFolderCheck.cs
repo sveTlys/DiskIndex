@@ -6,7 +6,7 @@ namespace DiskIndex.Models
     {
         private static Dictionary<string, string> _rootFolder;
 
-        //Unused for now, it will serve as a method to set the root folder to the JSON file for the first setup.
+        // Writes into the rootFolderPath.json, right now only used by the first setup system
         public static void SetRootFolderPath(string path)
         {
             _rootFolder = new Dictionary<string, string>{{ "rootFolderPath", path }};

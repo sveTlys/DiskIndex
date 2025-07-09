@@ -10,6 +10,7 @@
 
 @inject ICatalogService catalogService
 @inject MudBlazor.ISnackbar snackBar
+@inject MudBlazor.IDialogService dialogService
 
 <PageTitle>Home</PageTitle>
 
@@ -75,10 +76,22 @@ Filterable="true">
     private bool syncLoading = false;
     private string firstLine = string.Empty;
 
+    private readonly DialogOptions _backdropClick = new() { BackdropClick = false };
+
 
     private async Task<GridData<FileRecord>> LoadServerData(GridState<FileRecord> state)
     {
         loading = true;
+
+        string rootFolder = RootFolderCheck.GetRootFolderPath();
+
+        if(rootFolder == "" || rootFolder == string.Empty || rootFolder == " ")
+        {
+            var options = _backdropClick;
+            var dialog = await dialogService.ShowAsync<DialogFirstSetup>("Setup", options);
+            var result = await dialog.Result;
+        }
+
         var skip = state.Page * state.PageSize;
         var take = state.PageSize;
 
