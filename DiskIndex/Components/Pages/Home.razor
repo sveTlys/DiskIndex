@@ -85,7 +85,7 @@ Filterable="true">
 
         string rootFolder = RootFolderCheck.GetRootFolderPath();
 
-        if(rootFolder == "" || rootFolder == string.Empty || rootFolder == " ")
+        if (rootFolder == "" || rootFolder == string.Empty || rootFolder == " " || rootFolder == "PASTE YOUR ROOT PATH HERE")
         {
             var options = _backdropClick;
             var dialog = await dialogService.ShowAsync<DialogFirstSetup>("Setup", options);
