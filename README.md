@@ -75,7 +75,7 @@ For a more detailed "code stuff" I tried to comment every important methods in t
 
 As I said the project will receive additional updates even if the base features works as intended. I'm open for suggestions!
 
-- [ ] First Setup System (The webapp will ask the root path when run the first time or if the JSON file is not populated)
+- [x] First Setup System (The webapp will ask the root path when run the first time or if the JSON file is not populated)
 - [ ] NSFW Tagging System that uses a page to edit if files are supposed to be NSFW or not (useful for websites)
 - [ ] Add file preview (for images/videos)
 - [ ] User authentication system (optional)
