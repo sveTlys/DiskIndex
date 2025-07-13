@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 public class FileDbContext : DbContext
 {
     public DbSet<FileRecord> Files { get; set; }
+    public DbSet<UserAccount> Users { get; set; }
 
     public FileDbContext(DbContextOptions<FileDbContext> options) : base(options) { }
 }
