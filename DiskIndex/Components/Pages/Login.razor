@@ -1,0 +1,64 @@
+﻿@page "/"
+@layout LoginLayout
+
+@using MudBlazor
+@using MudBlazor.Extensions
+@using DiskIndex.Models
+@using DiskIndex.Services
+@using DiskIndex.Components.Layout
+@using System.IO
+@using System.Diagnostics
+@using System.Linq.Dynamic.Core
+@using System.Linq.Expressions
+
+@inject MudBlazor.IDialogService dialogService
+@inject DiskIndex.Services.IAuthService authService
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<PageTitle>DiskIndex - Login</PageTitle>
+
+<canvas id="canvas" style="position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-2;"></canvas>
+<div class="blur-overlay"></div>
+
+<div class="login-wrapper">
+    <div class="login-box">
+        <MudText Typo="Typo.h5" Class="mb-4">Sign In</MudText>
+        <MudTextField Label="Username" @bind-Value="_username" Variant="Variant.Outlined" />
+        <MudTextField Label="Password" @bind-Value="_password" InputType="InputType.Password" Variant="Variant.Outlined" />
+        <MudButton OnClick="Authentication" Variant="Variant.Filled" Color="Color.Primary" Class="mt-4 w-full">Login</MudButton>       
+    </div>
+	@if (LoginSuccess = false)
+	{
+		<MudText Color="Color.Error" Variant="Variant.Filled">Username or Password are not valid</MudText>
+	}
+</div>
+
+@code {
+    private string _username;
+    private string _password;
+    private bool LoginSuccess;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("loadLoginBackground");
+        }
+    }
+
+    private async Task Authentication()
+    {
+        var success = await authService.ValidateCredentialsAsync(_username, _password);
+        if (success)
+        {
+            LoginSuccess = true;
+            Navigation.NavigateTo("/Home");
+        }
+        else
+        {
+            LoginSuccess = false;
+        }
+    }
+}
+
